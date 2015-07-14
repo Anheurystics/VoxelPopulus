@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Voxel Populus</title>
+		<meta charset="utf-8">
+		<link rel="stylesheet" href="dependencies/bootstrap.css">
+		<script type="text/javascript" src="dependencies/jquery-1.11.1.min.js"></script>
+		<script type="text/javascript" src="dependencies/bootstrap.min.js"></script>
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<style>
+			p {
+				color: #bbbbbb;
+			}
+		</style>
+		<link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+	</head>
+	<body style="background: #808080">
+		<div class="container" id="openScreen">
+			<div class="row">
+				<span class="col-md-3"></span> <!--Temp Image-->
+				<span class="col-md-6"><img class="img-responsive" src="images/banner.png"></span>
+				<span class="col-md-3"></span>
+			</div>
+			<br>
+			<div class="row">
+				<span class="col-md-2"></span>
+				<span class="col-md-8"><p style="text-align: center; color: #bbbbbb"><b>CONTROLS</b></p>
+				<p class="text-center"> W-S - Pan Camera Forward-Backward</p>
+				<p class="text-center"> A-D - Pan Camera Left-Right</p>
+				<p class="text-center"> Q-E - Pan Camera Up-Down</p>
+				<p class="text-center"> Arrow Keys - Look Around</p>
+				<p class="text-center"> [Space] - Add Block</p>
+				<p class="text-center"> [Shift][Space] - Delete Block</p>
+				<p class="text-center"> X-C - Toggle Color</p>
+				</span>
+				<span class="col-md-2"></span>
+			</div>
+			<br>
+			<div class="row">
+				<span class="col-md-3"></span>
+				<span class="col-md-6"><a href="javascript:startSolo()"><button style="background-color: #666666; color: white" class="btn btn-block">Solo Play</button></a></span>
+				<span class="col-md-3"></span>
+			</div>
+			<br>
+			<div class="row">
+				<span class="col-md-3"></span>
+				<span class="col-md-6"><a href="javascript:joinGame()"><button style="background-color: #666666; color: white" class="btn btn-block">Join Game</button></a></span>
+				<span class="col-md-3"></span>
+			</div>
+			<script>
+			function startSolo()
+			{
+				window.location = "game.html?true";
+			}
+			
+			function joinGame()
+			{
+				var host = document.getElementById("host").value;
+				var port = document.getElementById("port").value;
+				
+				window.location = "game.html?false," + host + "," + port;
+			}
+			</script>
+			<br>
+			<div class="row">
+				<span class="col-md-3"></span>
+				<span class="col-md-3"><input id="host" class="input-lg" placeholder="Host"></input></span>
+				<span class="col-md-3"><input id="port" class="input-lg" placeholder="Port"></input></span>
+				<span class="col-md-3"></span>
+			</div>
+		</div>
+	</body>
+</html>
