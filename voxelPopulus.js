@@ -228,19 +228,11 @@ function makeShader(type, source) {
 	return shader;
 }
 
-function updateBlockData(blockIndex)
-{
-	var block = blocks[blockIndex];
-	console.log(block, blockIndex);
-}
-
 function allocateVertex(tPos, element, index, batchIndex, model, r, g, b, a)
 {
-	vec3.set(tPos, 
-		cube[(index * 20) + (element * 5) + 0],
-		cube[(index * 20) + (element * 5) + 1],
-		cube[(index * 20) + (element * 5) + 2]
-	)
+	tPos[0] = cube[(index * 20) + (element * 5) + 0];
+	tPos[1] = cube[(index * 20) + (element * 5) + 1];
+	tPos[2] = cube[(index * 20) + (element * 5) + 2];
 	
 	vec3.transformMat4(tPos, tPos, model);
 	
