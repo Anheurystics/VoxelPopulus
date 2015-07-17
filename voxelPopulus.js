@@ -88,7 +88,8 @@ var targetBlock;
 var intersectingSide;
 
 var keyStates = [];
-var ctrlReleased = false;
+var lastUp = [];
+var PRESSED_DURATION = 0.1;
 var isPointerLocked = false;
 
 window.onload = function()
@@ -120,51 +121,39 @@ window.onload = function()
 	{
 		alert("Can't get WebGL Context!");
 	}
-	
-	initGL();
-	
-	lastUpdate = Date.now();
-	
-	var query = window.location.search;
-	if(query.substring(0, 1) == '?')
-	{
-		query = query.substring(1);
-	}
-	var data = query.split(",");
-	for(var i = 0; i < data.length; i++)
-	{
-		data[i] = unescape(data[i]);
-	}
-	
-	isSoloGame = data[0] != "false";
-	
-	if(isSoloGame)
-	{
-		spawnBlock(0, 0, 0);
-		
-		//Benchmark
-		/*
-		var range = 100;
-		for(var i = 0; i < 1; i++)
-		{
-			var block = spawnBlock(Math.floor(Math.random() * range), Math.floor(Math.random() * range), Math.floor(Math.random() * range))
-			if(block == undefined) continue;
-			block.r = Math.random();
-			block.g = Math.random();
-			block.b = Math.random();
-		}
-		*/
-	}
 	else
 	{
-		socket = io.connect(data[1] + ":" + data[2]);
+		initGL();
 		
-		socket.on("update", function(data) {
-			blocks = data;
-		})
+		var query = window.location.search;
+		if(query.substring(0, 1) == '?')
+		{
+			query = query.substring(1);
+		}
+		var data = query.split(",");
+		for(var i = 0; i < data.length; i++)
+		{
+			data[i] = unescape(data[i]);
+		}
+		
+		isSoloGame = data[0] != "false";
+		
+		if(isSoloGame)
+		{
+			spawnBlock(0, 0, 0);
+		}
+		else
+		{
+			socket = io.connect(data[1] + ":" + data[2]);
+			
+			socket.on("update", function(data) {
+				blocks = data;
+			})
+		}
+		
+		lastUpdate = Date.now();
+		requestAnimationFrame(render);		
 	}
-	
-	requestAnimationFrame(render);
 }
 
 function initGL()
@@ -228,7 +217,8 @@ function makeShader(type, source) {
 	return shader;
 }
 
-function allocateVertex(tPos, element, index, batchIndex, model, r, g, b, a)
+var tPos = [];
+function allocateVertex(element, index, batchIndex, model, r, g, b, a)
 {
 	tPos[0] = cube[(index * 20) + (element * 5) + 0];
 	tPos[1] = cube[(index * 20) + (element * 5) + 1];
@@ -249,19 +239,17 @@ function allocateVertex(tPos, element, index, batchIndex, model, r, g, b, a)
 	return batchIndex;
 }
 
-var tPos = [];
-
 function drawCube(index, model, r, g, b, a)
 {
 	gl.uniformMatrix4fv(gl.getUniformLocation(program, "model"), false, model);
 	for(var i = 0; i < 6; i++)
 	{
-		index = allocateVertex(tPos, 0, i, index, model, r, g, b, a);
-		index = allocateVertex(tPos, 1, i, index, model, r, g, b, a);
-		index = allocateVertex(tPos, 2, i, index, model, r, g, b, a);
-		index = allocateVertex(tPos, 0, i, index, model, r, g, b, a);
-		index = allocateVertex(tPos, 2, i, index, model, r, g, b, a);
-		index = allocateVertex(tPos, 3, i, index, model, r, g, b, a);
+		index = allocateVertex(0, i, index, model, r, g, b, a);
+		index = allocateVertex(1, i, index, model, r, g, b, a);
+		index = allocateVertex(2, i, index, model, r, g, b, a);
+		index = allocateVertex(0, i, index, model, r, g, b, a);
+		index = allocateVertex(2, i, index, model, r, g, b, a);
+		index = allocateVertex(3, i, index, model, r, g, b, a);
 	}
 	return index;
 }
@@ -315,21 +303,15 @@ function deleteBlock(targetBlock)
 window.onkeydown = function(key)
 { 
 	keyStates[key.keyCode] = true;
+	if(lastUp[key.keyCode] == undefined)
+		lastUp[key.keyCode] = 0;
 }
 
 window.onkeyup = function(key)
 {
 	keyStates[key.keyCode] = false;
-	if(key.keyCode == 77)
-	{
-		if(canvas.requestPointerLock && document.exitPointerLock)
-		{
-			if(isPointerLocked) document.exitPointerLock();
-			else 				canvas.requestPointerLock();
-			
-			isPointerLocked = !isPointerLocked;
-		}
-	}
+	lastUp[key.keyCode] = 0;
+	
 	if(key.keyCode == 88)
 	{
 		currentColorIndex -= 1;
@@ -375,6 +357,16 @@ window.onkeyup = function(key)
 	}
 }
 
+function isKeyPressed(key)
+{
+	if(keyStates[key] && lastUp[key] < PRESSED_DURATION)
+	{
+		lastUp[key] = PRESSED_DURATION;
+		return true;
+	}
+	return false;
+}
+
 document.onmousemove = function(e)
 {
 	if(isPointerLocked)
@@ -410,72 +402,76 @@ function mollerTrumbore(v1, v2, v3, origin, direction)
 	return 0;
 }
 
+var movement = vec3.create();
+function moveCam(direction, magnitude)
+{
+	movement[0] = movement[1] = movement[2] = 0;
+	vec3.scale(movement, direction, magnitude);
+	vec3.add(camPos, camPos, movement);
+}
+
+function togglePointerLock()
+{
+	if(canvas.requestPointerLock && document.exitPointerLock)
+	{
+		if(isPointerLocked) document.exitPointerLock();
+		else 				canvas.requestPointerLock();
+		
+		isPointerLocked = !isPointerLocked;
+		console.log(isPointerLocked);
+	}	
+}
+
 function render()
 {	
 	var delta = (Date.now() - lastUpdate) / 1000;
 	lastUpdate = Date.now();
 	
+	for(key in keyStates)
+	{
+		if(keyStates[key])
+		{
+			lastUp[key] += delta;
+		}
+	}
+	
+	if(isKeyPressed(77))
+	{
+		togglePointerLock();
+	}
+	
 	if(keyStates[87])
-	{
-		var movement = vec3.create();
-		vec3.scale(movement, camFront, delta * 4);
-		
-		vec3.add(camPos, camPos, movement);
-	}
+		moveCam(camFront, delta * 4);
+
 	if(keyStates[83])
-	{
-		var movement = vec3.create();
-		vec3.scale(movement, camFront, -delta * 4);
-		
-		vec3.add(camPos, camPos, movement);
-	}
+		moveCam(camFront, -delta * 4);
+
 	if(keyStates[65])
-	{
-		var movement = vec3.create();
-		vec3.scale(movement, camRight, -delta * 4);
-		
-		vec3.add(camPos, camPos, movement);
-	}
+		moveCam(camRight, -delta * 4);
+
 	if(keyStates[68])
-	{
-		var movement = vec3.create();
-		vec3.scale(movement, camRight, delta * 4);
-		
-		vec3.add(camPos, camPos, movement);
-	}
+		moveCam(camRight, delta * 4);
+
 	if(keyStates[81])
-	{
-		var movement = vec3.create();
-		vec3.scale(movement, camUp, delta * 4);
-		
-		vec3.add(camPos, camPos, movement);
-	}
+		moveCam(camUp, delta * 4);
+
 	if(keyStates[69])
-	{
-		var movement = vec3.create();
-		vec3.scale(movement, camUp, -delta * 4);
-		
-		vec3.add(camPos, camPos, movement);		
-	}
+		moveCam(camUp, -delta * 4);
+
 	if(keyStates[38])
-	{
 		camPitch += Math.PI / 3 * delta;
-	}
+
 	if(keyStates[40])
-	{
 		camPitch -= Math.PI / 3 * delta;
-	}
+
 	if(keyStates[37])
-	{
 		camYaw -= Math.PI / 3 * delta;
-	}
+
 	if(keyStates[39])
-	{
 		camYaw += Math.PI / 3 * delta;
-	}
 	
-	camPitch = clamp(camPitch, -vFov, vFov);
-	
+	camPitch = Math.max(Math.min(camPitch, vFov), -vFov);
+
 	camFront[0] = Math.cos(camYaw) * Math.cos(camPitch);
 	camFront[1] = Math.sin(camPitch);
 	camFront[2] = Math.sin(camYaw) * Math.cos(camPitch);
@@ -606,12 +602,7 @@ function render()
 			gl.drawArrays(gl.TRIANGLES, 0, batchArray.length / 9);
 		}
 	}
-	/*
-	for(var i = index; i < batchArray.length; i++)
-	{
-		batchArray[i] = 0;
-	}
-	*/
+
 	batchArray.fill(0, index, batchArray.length);
 	
 	if(index > 0)
@@ -635,13 +626,6 @@ function render()
 	context.fillStyle = "#FFFFFF";
 	context.fillText(Math.floor(1 / delta) + " fps", 20, 20);
 	requestAnimationFrame(render);
-}
-
-function clamp(val, min, max)
-{
-	if(val < min) return min;
-	if(val > max) return max;
-	return val;
 }
 
 window.onresize = function()
