@@ -54,6 +54,8 @@ var camGlobalUp;
 var camYaw;
 var camPitch;
 
+var LOOK_SPEED = Math.PI / 2;
+
 var blockTex = new Image();
 blockTex.src = "images/blockTex.png";
 
@@ -206,7 +208,17 @@ function initGL()
 	gl.depthFunc(gl.LEQUAL);
 	
 	gl.enable(gl.BLEND);
-	gl.blendFunc (gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);	
+	gl.blendFunc (gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+	/*
+	for(var i = 0; i < 10000; i++)
+	{
+		spawnBlock(
+			Math.floor(Math.random() * 100) * (Math.random() > 0.5? 1 : -1),
+			Math.floor(Math.random() * 100) * (Math.random() > 0.5? 1 : -1),
+			Math.floor(Math.random() * 100) * (Math.random() > 0.5? 1 : -1)
+		);
+	}
+	*/
 }
 
 function makeShader(type, source) {
@@ -252,6 +264,35 @@ function drawCube(index, model, r, g, b, a)
 		index = allocateVertex(3, i, index, model, r, g, b, a);
 	}
 	return index;
+}
+
+function placeBlock()
+{
+	if(targetBlock != undefined)
+	{
+		var newBlock;
+		if(intersectingSide == 0) newBlock = spawnBlock(targetBlock.x, targetBlock.y, targetBlock.z + 1);
+		if(intersectingSide == 1) newBlock = spawnBlock(targetBlock.x, targetBlock.y, targetBlock.z - 1);
+		if(intersectingSide == 2) newBlock = spawnBlock(targetBlock.x - 1, targetBlock.y, targetBlock.z);
+		if(intersectingSide == 3) newBlock = spawnBlock(targetBlock.x + 1, targetBlock.y, targetBlock.z);
+		if(intersectingSide == 4) newBlock = spawnBlock(targetBlock.x, targetBlock.y + 1, targetBlock.z);
+		if(intersectingSide == 5) newBlock = spawnBlock(targetBlock.x, targetBlock.y - 1, targetBlock.z);
+		
+		if(!isSoloGame)
+		{
+			socket.emit("block_update", {type: "add", block: newBlock});
+		}
+	}	
+}
+
+function removeBlock()
+{
+	deleteBlock(targetBlock);
+	if(!isSoloGame)
+	{
+		socket.emit("block_update", {type: "remove", block: targetBlock});
+	}
+	targetBlock = undefined;
 }
 
 function spawnBlock(x, y, z)
@@ -330,29 +371,13 @@ window.onkeyup = function(key)
 	}
 	if(key.keyCode == 32)
 	{
-		if(!key.shiftKey && targetBlock != undefined)
+		if(!key.shiftKey)
 		{
-			var newBlock;
-			if(intersectingSide == 0) newBlock = spawnBlock(targetBlock.x, targetBlock.y, targetBlock.z + 1);
-			if(intersectingSide == 1) newBlock = spawnBlock(targetBlock.x, targetBlock.y, targetBlock.z - 1);
-			if(intersectingSide == 2) newBlock = spawnBlock(targetBlock.x - 1, targetBlock.y, targetBlock.z);
-			if(intersectingSide == 3) newBlock = spawnBlock(targetBlock.x + 1, targetBlock.y, targetBlock.z);
-			if(intersectingSide == 4) newBlock = spawnBlock(targetBlock.x, targetBlock.y + 1, targetBlock.z);
-			if(intersectingSide == 5) newBlock = spawnBlock(targetBlock.x, targetBlock.y - 1, targetBlock.z);
-			
-			if(!isSoloGame)
-			{
-				socket.emit("block_update", {type: "add", block: newBlock});
-			}
+			placeBlock();
 		}
 		else
 		{
-			deleteBlock(targetBlock);
-			if(!isSoloGame)
-			{
-				socket.emit("block_update", {type: "remove", block: targetBlock});
-			}
-			targetBlock = undefined;
+			removeBlock();
 		}
 	}
 }
@@ -374,8 +399,41 @@ document.onmousemove = function(e)
 		  var mx = e.movementX || e.mozMovementX || e.webkitMovementX || 0;
 		  var my = e.movementY || e.mozMovementY || e.webkitMovementY || 0;
 		  
-		  camYaw += (mx / canvas.width) * Math.PI / 2;
-		  camPitch += (-my / canvas.height) * Math.PI / 2;
+		  camYaw += (mx / 1000) * LOOK_SPEED;
+		  camPitch += (-my / 1000) * LOOK_SPEED;
+	}
+}
+
+if ("onpointerlockchange" in document) {
+	document.addEventListener('pointerlockchange', onPointerLockChange, false);
+} else if ("onmozpointerlockchange" in document) {
+	document.addEventListener('mozpointerlockchange', onPointerLockChange, false);
+} else if ("onwebkitpointerlockchange" in document) {
+	document.addEventListener('webkitpointerlockchange', onPointerLockChange, false);
+}
+
+function onPointerLockChange(e)
+{
+	if(document.pointerLockElement === canvas || document.mozPointerLockElement === canvas || document.webkitPointerLockElement === canvas) {
+		isPointerLocked = true;
+	} else {
+		isPointerLocked = false;   
+	}
+}
+
+document.onclick = function(e)
+{
+	if(!isPointerLocked)
+	{
+		if(canvas.requestPointerLock && document.exitPointerLock)
+		{
+			canvas.requestPointerLock();
+		}	
+	}
+	else
+	{
+		if(e.button == 0) placeBlock();
+		if(e.button == 2) removeBlock();
 	}
 }
 
@@ -384,21 +442,20 @@ function mollerTrumbore(v1, v2, v3, origin, direction)
 {
 	var EPSILON = 0.000001, E1 = vec3.create(), E2 = vec3.create(),
 		P = vec3.create(), Q = vec3.create(), T = vec3.create(),
-		det, invDet, u ,v;
+		det, u ,v;
 	
 	vec3.sub(E1, v2, v1);
 	vec3.sub(E2, v3, v1);
 	vec3.cross(P, direction, E2);
 	det = vec3.dot(E1, P);
 	if(det > -EPSILON && det < EPSILON) return 0;
-	invDet = 1.0 / det;
 	vec3.sub(T, origin, v1);
-	u = vec3.dot(T, P) * invDet;
+	u = vec3.dot(T, P) / det;
 	if(u < 0 || u > 1) return 0;
 	vec3.cross(Q, T, E1);
-	v = vec3.dot(direction, Q) * invDet;
+	v = vec3.dot(direction, Q) / det;
 	if(v < 0 || u + v > 1) return 0;
-	if(vec3.dot(E2, Q) * invDet > EPSILON) return 1;
+	if(vec3.dot(E2, Q) / det > EPSILON) return 1;
 	return 0;
 }
 
@@ -408,18 +465,6 @@ function moveCam(direction, magnitude)
 	movement[0] = movement[1] = movement[2] = 0;
 	vec3.scale(movement, direction, magnitude);
 	vec3.add(camPos, camPos, movement);
-}
-
-function togglePointerLock()
-{
-	if(canvas.requestPointerLock && document.exitPointerLock)
-	{
-		if(isPointerLocked) document.exitPointerLock();
-		else 				canvas.requestPointerLock();
-		
-		isPointerLocked = !isPointerLocked;
-		console.log(isPointerLocked);
-	}	
 }
 
 function render()
@@ -435,9 +480,12 @@ function render()
 		}
 	}
 	
-	if(isKeyPressed(77))
+	if(isKeyPressed(27))
 	{
-		togglePointerLock();
+		if(isPointerLocked)
+		{
+			isPointerLocked = false;
+		}
 	}
 	
 	if(keyStates[87])
@@ -459,18 +507,18 @@ function render()
 		moveCam(camUp, -delta * 4);
 
 	if(keyStates[38])
-		camPitch += Math.PI / 3 * delta;
+		camPitch += LOOK_SPEED * delta;
 
 	if(keyStates[40])
-		camPitch -= Math.PI / 3 * delta;
+		camPitch -= LOOK_SPEED * delta;
 
 	if(keyStates[37])
-		camYaw -= Math.PI / 3 * delta;
+		camYaw -= LOOK_SPEED * delta;
 
 	if(keyStates[39])
-		camYaw += Math.PI / 3 * delta;
+		camYaw += LOOK_SPEED * delta;
 	
-	camPitch = Math.max(Math.min(camPitch, vFov), -vFov);
+	camPitch = Math.max(Math.min(camPitch, vFov * 1.5), -vFov * 1.5);
 
 	camFront[0] = Math.cos(camYaw) * Math.cos(camPitch);
 	camFront[1] = Math.sin(camPitch);
@@ -505,6 +553,7 @@ function render()
 	
 	var model;
 	targetBlock = undefined;
+
 	for(var i = 0; i < blocks.length; i++)
 	{
 		var block = blocks[i];
@@ -524,7 +573,7 @@ function render()
 				vec3.scale(rFront, camFront, 1.5);
 				
 				var t1v1 = vec3.create(), t1v2 = vec3.create(), t1v3 = vec3.create();
-				vec3.set(t1v1, 	
+				vec3.set(t1v1,
 					block.x + cube[(j * 20) + (0 * 5) + 0],
 					block.y + cube[(j * 20) + (0 * 5) + 1],
 					block.z + cube[(j * 20) + (0 * 5) + 2]);
@@ -603,6 +652,8 @@ function render()
 		}
 	}
 
+	console.log(index);
+	
 	batchArray.fill(0, index, batchArray.length);
 	
 	if(index > 0)
