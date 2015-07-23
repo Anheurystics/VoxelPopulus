@@ -94,7 +94,9 @@ var lastUp = [];
 var PRESSED_DURATION = 0.1;
 var isPointerLocked = false;
 
-window.onload = function()
+window.addEventListener("load", init);
+
+function init()
 {
 	canvas = document.getElementById("canvas");
 	
@@ -343,14 +345,14 @@ function deleteBlock(targetBlock)
 	}
 }
 
-window.onkeydown = function(key)
+function keydown(key)
 { 
 	keyStates[key.keyCode] = true;
 	if(lastUp[key.keyCode] == undefined)
 		lastUp[key.keyCode] = 0;
 }
 
-window.onkeyup = function(key)
+function keyup(key)
 {
 	keyStates[key.keyCode] = false;
 	lastUp[key.keyCode] = 0;
@@ -384,6 +386,9 @@ window.onkeyup = function(key)
 	}
 }
 
+window.addEventListener("keydown", keydown);
+window.addEventListener("keyup", keyup);
+
 function isKeyPressed(key)
 {
 	if(keyStates[key] && lastUp[key] < PRESSED_DURATION)
@@ -394,7 +399,7 @@ function isKeyPressed(key)
 	return false;
 }
 
-document.onmousemove = function(e)
+function mousemove(e)
 {
 	if(isPointerLocked)
 	{
@@ -406,14 +411,6 @@ document.onmousemove = function(e)
 	}
 }
 
-if ("onpointerlockchange" in document) {
-	document.addEventListener('pointerlockchange', onPointerLockChange, false);
-} else if ("onmozpointerlockchange" in document) {
-	document.addEventListener('mozpointerlockchange', onPointerLockChange, false);
-} else if ("onwebkitpointerlockchange" in document) {
-	document.addEventListener('webkitpointerlockchange', onPointerLockChange, false);
-}
-
 function onPointerLockChange(e)
 {
 	if(document.pointerLockElement === canvas || document.mozPointerLockElement === canvas || document.webkitPointerLockElement === canvas) {
@@ -423,7 +420,7 @@ function onPointerLockChange(e)
 	}
 }
 
-document.onclick = function(e)
+function click(e)
 {
 	if(!isPointerLocked)
 	{
@@ -439,7 +436,17 @@ document.onclick = function(e)
 	}
 }
 
-//Based on the C example on Wikipedia. I'll understand this someday
+document.addEventListener("mousemove", mousemove);
+document.addEventListener("click", click);
+
+if ("onpointerlockchange" in document) {
+	document.addEventListener("pointerlockchange", onPointerLockChange, false);
+} else if ("onmozpointerlockchange" in document) {
+	document.addEventListener("mozpointerlockchange", onPointerLockChange, false);
+} else if ("onwebkitpointerlockchange" in document) {
+	document.addEventListener("webkitpointerlockchange", onPointerLockChange, false);
+}
+
 function mollerTrumbore(v1, v2, v3, origin, direction)
 {
 	var EPSILON = 0.000001, E1 = vec3.create(), E2 = vec3.create(),
