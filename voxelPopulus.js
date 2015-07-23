@@ -148,9 +148,11 @@ window.onload = function()
 		{
 			socket = io.connect(data[1] + ":" + data[2]);
 			
-			socket.on("update", function(data) {
+			socket.on("update", updateBlocks);
+			
+			function updateBlocks(data) {
 				blocks = data;
-			})
+			}
 		}
 		
 		lastUpdate = Date.now();
@@ -651,8 +653,6 @@ function render()
 			gl.drawArrays(gl.TRIANGLES, 0, batchArray.length / 9);
 		}
 	}
-
-	console.log(index);
 	
 	batchArray.fill(0, index, batchArray.length);
 	
