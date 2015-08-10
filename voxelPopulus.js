@@ -660,9 +660,10 @@ function render()
 			gl.drawArrays(gl.TRIANGLES, 0, batchArray.length / 9);
 		}
 	}
-	
-	batchArray.fill(0, index, batchArray.length);
-	
+	for(var i = index; i < batchArray.length; i++)
+	{
+		batchArray[i] = 0;
+	}
 	if(index > 0)
 	{
 		gl.bufferData(gl.ARRAY_BUFFER, batchArray, gl.STATIC_DRAW);
