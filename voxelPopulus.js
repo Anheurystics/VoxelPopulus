@@ -108,7 +108,9 @@ function init()
 			 document.mozExitPointerLock ||
 			 document.webkitExitPointerLock;
 	
-	gl = canvas.getContext("webgl", {antialias: true});
+	gl = canvas.getContext("webgl");
+	if(!gl)
+		gl = canvas.getContext("experimental-webgl");
 
 	overlay = document.getElementById("canvasOverlay");
 	context = overlay.getContext("2d");
@@ -660,10 +662,12 @@ function render()
 			gl.drawArrays(gl.TRIANGLES, 0, batchArray.length / 9);
 		}
 	}
+	
 	for(var i = index; i < batchArray.length; i++)
 	{
 		batchArray[i] = 0;
 	}
+	
 	if(index > 0)
 	{
 		gl.bufferData(gl.ARRAY_BUFFER, batchArray, gl.STATIC_DRAW);
