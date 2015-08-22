@@ -41,7 +41,7 @@ var cube = [
 ];
 
 var vertexBuffer;
-var batchArray = new Float32Array(9 * 36 * 1000);
+var batchArray = new Float32Array(9 * 36 * 500);
 var batchIndex = 0;
 
 var view, projection;
@@ -79,7 +79,7 @@ var colors =
 	[1.0, 1.0, 1.0],	//White
 	[0.1, 0.1, 0.1],	//Black
 	[0.5, 0.2, 0.0],	//Brown
-	[0.15, 0.5, 0.0],	//Dark green
+	[0.15, 0.5, 0.0]	//Dark green
 ]
 var currentColorIndex = 0;
 
