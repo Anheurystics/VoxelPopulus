@@ -57,7 +57,7 @@ var camPitch;
 var LOOK_SPEED = Math.PI / 2;
 
 var blockTex = new Image();
-blockTex.src = "images/blockTex.png";
+blockTex.src = "images/blockTex_0.png";
 
 var cubeTexture;
 
@@ -93,6 +93,9 @@ var keyStates = [];
 var lastUp = [];
 var PRESSED_DURATION = 0.1;
 var isPointerLocked = false;
+
+var fps;
+var fpsUpdate = 0.5;
 
 window.addEventListener("load", init);
 
@@ -469,6 +472,8 @@ function moveCam(direction, magnitude)
 
 function render()
 {	
+	requestAnimationFrame(render);
+
 	var delta = (Date.now() - lastUpdate) / 1000;
 	lastUpdate = Date.now();
 	
@@ -669,15 +674,22 @@ function render()
 	var g = Math.floor(colors[currentColorIndex][1] * 255);
 	var b = Math.floor(colors[currentColorIndex][2] * 255);
 	
+	fpsUpdate += delta;
+	if(fpsUpdate >= 0.5)
+	{
+		fpsUpdate = 0;
+		fps = Math.floor(1 / delta);
+	}
+	
 	context.fillStyle = "rgb(" + r + "," + g + "," + b + ")";
 	context.fillRect(overlay.width * 0.3, overlay.height * 0.9, overlay.width * 0.4, overlay.height * 0.05);
 	context.strokeStyle = "#000000";
 	context.strokeRect(overlay.width * 0.3, overlay.height * 0.9, overlay.width * 0.4, overlay.height * 0.05);
 	context.strokeStyle = "#DDDDDD";
 	context.strokeRect(overlay.width/2 - 5,overlay.height/2 - 5, 10, 10);
+	context.font = "12px Arial";
 	context.fillStyle = "#FFFFFF";
-	context.fillText(Math.floor(1 / delta) + " fps", 20, 20);
-	requestAnimationFrame(render);
+	context.fillText(fps + " fps", 20, 20);
 }
 
 window.onresize = function()
