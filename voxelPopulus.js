@@ -384,11 +384,11 @@ function mousemove(e)
 {
 	if(isPointerLocked)
 	{
-		  var mx = e.movementX || e.mozMovementX || e.webkitMovementX || 0;
-		  var my = e.movementY || e.mozMovementY || e.webkitMovementY || 0;
+		var mx = e.movementX || e.mozMovementX || e.webkitMovementX || 0;
+		var my = e.movementY || e.mozMovementY || e.webkitMovementY || 0;
 		  
-		  camYaw += (mx / 1000) * LOOK_SPEED;
-		  camPitch += (-my / 1000) * LOOK_SPEED;
+		camYaw += (mx / 1000) * LOOK_SPEED;
+		camPitch += (-my / 1000) * LOOK_SPEED;
 	}
 }
 
@@ -399,11 +399,9 @@ function mousewheel(e)
 
 function onPointerLockChange(e)
 {
-	if(document.pointerLockElement === canvas || document.mozPointerLockElement === canvas || document.webkitPointerLockElement === canvas) {
-		isPointerLocked = true;
-	} else {
-		isPointerLocked = false;   
-	}
+	isPointerLocked = document.pointerLockElement === canvas || 
+						document.mozPointerLockElement === canvas || 
+						document.webkitPointerLockElement === canvas;
 }
 
 function click(e)
@@ -426,13 +424,12 @@ document.addEventListener("mousemove", mousemove);
 document.addEventListener("mousewheel", mousewheel);
 document.addEventListener("click", click);
 
-if ("onpointerlockchange" in document) {
+if ("onpointerlockchange" in document)
 	document.addEventListener("pointerlockchange", onPointerLockChange, false);
-} else if ("onmozpointerlockchange" in document) {
+else if ("onmozpointerlockchange" in document)
 	document.addEventListener("mozpointerlockchange", onPointerLockChange, false);
-} else if ("onwebkitpointerlockchange" in document) {
+else if ("onwebkitpointerlockchange" in document)
 	document.addEventListener("webkitpointerlockchange", onPointerLockChange, false);
-}
 
 function mollerTrumbore(v1, v2, v3, origin, direction)
 {
@@ -471,20 +468,12 @@ function render()
 	lastUpdate = Date.now();
 	
 	for(key in keyStates)
-	{
 		if(keyStates[key])
-		{
 			lastUp[key] += delta;
-		}
-	}
 	
 	if(isKeyPressed(27))
-	{
 		if(isPointerLocked)
-		{
 			isPointerLocked = false;
-		}
-	}
 	
 	if(isKeyPressed(88))
 		setColorIndex(currentColorIndex - 1);
@@ -493,12 +482,10 @@ function render()
 		setColorIndex(currentColorIndex + 1);
 		
 	if(isKeyPressed(32))
-	{
 		if(!keyStates[16]) 
 			placeBlock();
 		else
 			removeBlock();
-	}
 	
 	if(keyStates[87])
 		moveCam(camFront, delta * 4);
@@ -647,9 +634,7 @@ function render()
 		var dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
 		
 		if(dist >= 100)
-		{
 			continue;
-		}
 		
 		model = mat4.create();
 		mat4.translate(model, model, [block.x, block.y, block.z]);
@@ -665,9 +650,7 @@ function render()
 	}
 	
 	for(var i = index; i < batchArray.length; i++)
-	{
 		batchArray[i] = 0;
-	}
 	
 	if(index > 0)
 	{
