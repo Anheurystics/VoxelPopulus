@@ -179,7 +179,10 @@ function initGL()
 	gl.attachShader(program, vertShader);
 	gl.attachShader(program, fragShader);
 	gl.linkProgram(program);
-	console.log(gl.getProgramInfoLog(program));
+	if(!gl.getProgramParameter(program, gl.LINK_STATUS))
+	{
+		throw "Program link error: " + gl.getProgramInfoLog(program);
+	}
 	gl.useProgram(program);
 	
 	vertexBuffer = gl.createBuffer();
@@ -221,11 +224,15 @@ function initGL()
 	gl.blendFunc (gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 }
 
-function makeShader(type, source) {
+function makeShader(type, source)
+{
 	var shader = gl.createShader(type);
 	gl.shaderSource(shader, source);
 	gl.compileShader(shader);
-	console.log(gl.getShaderInfoLog(shader));
+	if(!gl.getShaderParameter(shader, gl.COMPILE_STATUS))
+	{
+		throw "Shader compile error: "  + gl.getShaderInfoLog(shader);
+	}
 	return shader;
 }
 
