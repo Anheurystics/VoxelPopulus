@@ -98,6 +98,7 @@ var fps;
 var fpsUpdate = 0.5;
 
 window.addEventListener("load", init);
+window.addEventListener("resize", resize);
 
 function init()
 {
@@ -339,6 +340,13 @@ function deleteBlock(targetBlock)
 	}
 }
 
+function setColorIndex(index)
+{
+	currentColorIndex = index;
+	if(currentColorIndex < 0) currentColorIndex = colors.length - 1;
+	if(currentColorIndex >= colors.length) currentColorIndex = 0;
+}
+
 function keydown(key)
 { 
 	keyStates[key.keyCode] = true;
@@ -350,34 +358,6 @@ function keyup(key)
 {
 	keyStates[key.keyCode] = false;
 	lastUp[key.keyCode] = 0;
-	
-	if(key.keyCode == 88)
-	{
-		currentColorIndex -= 1;
-		if(currentColorIndex < 0)
-		{
-			currentColorIndex = colors.length - 1;
-		}
-	}
-	if(key.keyCode == 67)
-	{
-		currentColorIndex += 1;
-		if(currentColorIndex >= colors.length)
-		{
-			currentColorIndex = 0;
-		}
-	}
-	if(key.keyCode == 32)
-	{
-		if(!key.shiftKey)
-		{
-			placeBlock();
-		}
-		else
-		{
-			removeBlock();
-		}
-	}
 }
 
 window.addEventListener("keydown", keydown);
@@ -403,6 +383,11 @@ function mousemove(e)
 		  camYaw += (mx / 1000) * LOOK_SPEED;
 		  camPitch += (-my / 1000) * LOOK_SPEED;
 	}
+}
+
+function mousewheel(e)
+{
+	setColorIndex(currentColorIndex + Math.sign(e.wheelDelta));
 }
 
 function onPointerLockChange(e)
@@ -431,6 +416,7 @@ function click(e)
 }
 
 document.addEventListener("mousemove", mousemove);
+document.addEventListener("mousewheel", mousewheel);
 document.addEventListener("click", click);
 
 if ("onpointerlockchange" in document) {
@@ -491,6 +477,20 @@ function render()
 		{
 			isPointerLocked = false;
 		}
+	}
+	
+	if(isKeyPressed(88))
+		setColorIndex(currentColorIndex - 1);
+	
+	if(isKeyPressed(67))
+		setColorIndex(currentColorIndex + 1);
+		
+	if(isKeyPressed(32))
+	{
+		if(!keyStates[16]) 
+			placeBlock();
+		else
+			removeBlock();
 	}
 	
 	if(keyStates[87])
@@ -686,17 +686,19 @@ function render()
 	context.strokeStyle = "#000000";
 	context.strokeRect(overlay.width * 0.3, overlay.height * 0.9, overlay.width * 0.4, overlay.height * 0.05);
 	context.strokeStyle = "#DDDDDD";
-	context.strokeRect(overlay.width/2 - 5,overlay.height/2 - 5, 10, 10);
+	context.beginPath();
+	context.arc(overlay.width/2,overlay.height/2, 4, 0, Math.PI * 2, true);
+	context.stroke();
 	context.font = "12px Arial";
 	context.fillStyle = "#FFFFFF";
 	context.fillText(fps + " fps", 20, 20);
 }
 
-window.onresize = function()
+function resize()
 {
 	canvas.width = window.innerWidth;
 	canvas.height = window.innerHeight;
 	overlay.width = canvas.width;
 	overlay.height = canvas.height;
-	mat4.perspective(projection, vFov = 2 * Math.atan(Math.tan(hFov / 2) * canvas.height / canvas.width), canvas.width / canvas.height, 0.1, 100.0);
+	mat4.perspective(projection, vFov = 2 * Math.atan(Math.tan(hFov / 2) * canvas.height / canvas.width), canvas.width / canvas.height, 0.1, 100.0);	
 }
