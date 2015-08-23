@@ -215,16 +215,6 @@ function initGL()
 	
 	gl.enable(gl.BLEND);
 	gl.blendFunc (gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-	/*
-	for(var i = 0; i < 10000; i++)
-	{
-		spawnBlock(
-			Math.floor(Math.random() * 100) * (Math.random() > 0.5? 1 : -1),
-			Math.floor(Math.random() * 100) * (Math.random() > 0.5? 1 : -1),
-			Math.floor(Math.random() * 100) * (Math.random() > 0.5? 1 : -1)
-		);
-	}
-	*/
 }
 
 function makeShader(type, source) {
@@ -257,17 +247,16 @@ function allocateVertex(element, index, batchIndex, model, r, g, b, a)
 	return batchIndex;
 }
 
+var indexOrder = [0, 1, 2, 0, 2, 3];
 function drawCube(index, model, r, g, b, a)
 {
 	gl.uniformMatrix4fv(gl.getUniformLocation(program, "model"), false, model);
 	for(var i = 0; i < 6; i++)
 	{
-		index = allocateVertex(0, i, index, model, r, g, b, a);
-		index = allocateVertex(1, i, index, model, r, g, b, a);
-		index = allocateVertex(2, i, index, model, r, g, b, a);
-		index = allocateVertex(0, i, index, model, r, g, b, a);
-		index = allocateVertex(2, i, index, model, r, g, b, a);
-		index = allocateVertex(3, i, index, model, r, g, b, a);
+		for(var j = 0; j < indexOrder.length; j++) 
+		{
+			index = allocateVertex(indexOrder[j], i, index, model, r, g, b, a);
+		}
 	}
 	return index;
 }
