@@ -162,7 +162,7 @@ function init() {
 function initGL() {
 	var vertShader = makeShader(gl.VERTEX_SHADER, document.getElementById("vert-shader").innerHTML);
 	var fragShader = makeShader(gl.FRAGMENT_SHADER, document.getElementById("frag-shader").innerHTML);
-
+	
 	gl.clearColor(0.2, 0.2, 0.2, 1.0);
 	
 	program = gl.createProgram();
@@ -245,11 +245,12 @@ function allocateVertex(element, index, batchIndex, model, r, g, b, a) {
 }
 
 var indexOrder = [0, 1, 2, 0, 2, 3];
-function drawCube(index, model, r, g, b, a) {
+function drawCube(index, model, r, g, b, selected) {
 	gl.uniformMatrix4fv(gl.getUniformLocation(program, "model"), false, model);
 	for(var i = 0; i < 6; i++) {
 		for(var j = 0; j < indexOrder.length; j++)  {
-			index = allocateVertex(indexOrder[j], i, index, model, r, g, b, a);
+			var br = (selected && i == intersectingSide)? 1.75 : 1.0;
+			index = allocateVertex(indexOrder[j], i, index, model, r * br, g * br, b * br, 1.0);
 		}
 	}
 	return index;
@@ -584,9 +585,8 @@ function render() {
 		
 		model = mat4.create();
 		mat4.translate(model, model, [block.x, block.y, block.z]);
-		
-		var brightness = (targetBlock != undefined && targetBlock.id == block.id)? 1.5 : 1.0;
-		index = drawCube(index, model, block.r * brightness, block.g * brightness, block.b * brightness, 1.0);	
+
+		index = drawCube(index, model, block.r, block.g, block.b, targetBlock != undefined && targetBlock.id == block.id);	
 		if(index == batchArray.length) {
 			index = 0;
 			gl.bufferData(gl.ARRAY_BUFFER, batchArray, gl.STATIC_DRAW);
