@@ -8,7 +8,7 @@ html, body {
 	height: 100%;
 }
 
-#canvas, #canvasOverlay, #htmlOverlay {
+#canvas, #canvasOverlay {
 	display: block;
 	position: absolute;
 	top: 0px;
