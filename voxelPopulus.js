@@ -100,8 +100,7 @@ var fpsUpdate = 0.5;
 window.addEventListener("load", init);
 window.addEventListener("resize", resize);
 
-function init()
-{
+function init() {
 	canvas = document.getElementById("canvas");
 	
 	canvas.requestPointerLock = canvas.requestPointerLock ||
@@ -127,33 +126,25 @@ function init()
 	overlay.style.position = "relative";
 	overlay.style.transform = canvas.style.transform;
 	
-	if(!gl)
-	{
+	if(!gl) {
 		alert("Can't get WebGL Context!");
-	}
-	else
-	{
+	} else {
 		initGL();
 		
 		var query = window.location.search;
-		if(query.substring(0, 1) == '?')
-		{
+		if(query.substring(0, 1) == '?') {
 			query = query.substring(1);
 		}
 		var data = query.split(",");
-		for(var i = 0; i < data.length; i++)
-		{
+		for(var i = 0; i < data.length; i++) {
 			data[i] = unescape(data[i]);
 		}
 		
 		isSoloGame = data[0] != "false";
 		
-		if(isSoloGame)
-		{
+		if(isSoloGame) {
 			spawnBlock(0, 0, 0);
-		}
-		else
-		{
+		} else {
 			socket = io.connect(data[1] + ":" + data[2]);
 			
 			socket.on("update", updateBlocks);
@@ -168,8 +159,7 @@ function init()
 	}
 }
 
-function initGL()
-{
+function initGL() {
 	var vertShader = makeShader(gl.VERTEX_SHADER, document.getElementById("vert-shader").innerHTML);
 	var fragShader = makeShader(gl.FRAGMENT_SHADER, document.getElementById("frag-shader").innerHTML);
 
@@ -179,8 +169,7 @@ function initGL()
 	gl.attachShader(program, vertShader);
 	gl.attachShader(program, fragShader);
 	gl.linkProgram(program);
-	if(!gl.getProgramParameter(program, gl.LINK_STATUS))
-	{
+	if(!gl.getProgramParameter(program, gl.LINK_STATUS)) {
 		throw "Program link error: " + gl.getProgramInfoLog(program);
 	}
 	gl.useProgram(program);
@@ -224,21 +213,18 @@ function initGL()
 	gl.blendFunc (gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 }
 
-function makeShader(type, source)
-{
+function makeShader(type, source) {
 	var shader = gl.createShader(type);
 	gl.shaderSource(shader, source);
 	gl.compileShader(shader);
-	if(!gl.getShaderParameter(shader, gl.COMPILE_STATUS))
-	{
+	if(!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
 		throw "Shader compile error: "  + gl.getShaderInfoLog(shader);
 	}
 	return shader;
 }
 
 var tPos = [];
-function allocateVertex(element, index, batchIndex, model, r, g, b, a)
-{
+function allocateVertex(element, index, batchIndex, model, r, g, b, a) {
 	tPos[0] = cube[(index * 20) + (element * 5) + 0];
 	tPos[1] = cube[(index * 20) + (element * 5) + 1];
 	tPos[2] = cube[(index * 20) + (element * 5) + 2];
@@ -259,23 +245,18 @@ function allocateVertex(element, index, batchIndex, model, r, g, b, a)
 }
 
 var indexOrder = [0, 1, 2, 0, 2, 3];
-function drawCube(index, model, r, g, b, a)
-{
+function drawCube(index, model, r, g, b, a) {
 	gl.uniformMatrix4fv(gl.getUniformLocation(program, "model"), false, model);
-	for(var i = 0; i < 6; i++)
-	{
-		for(var j = 0; j < indexOrder.length; j++) 
-		{
+	for(var i = 0; i < 6; i++) {
+		for(var j = 0; j < indexOrder.length; j++)  {
 			index = allocateVertex(indexOrder[j], i, index, model, r, g, b, a);
 		}
 	}
 	return index;
 }
 
-function placeBlock()
-{
-	if(targetBlock != undefined)
-	{
+function placeBlock() {
+	if(targetBlock != undefined) {
 		var newBlock;
 		if(intersectingSide == 0) newBlock = spawnBlock(targetBlock.x, targetBlock.y, targetBlock.z + 1);
 		if(intersectingSide == 1) newBlock = spawnBlock(targetBlock.x, targetBlock.y, targetBlock.z - 1);
@@ -284,39 +265,31 @@ function placeBlock()
 		if(intersectingSide == 4) newBlock = spawnBlock(targetBlock.x, targetBlock.y + 1, targetBlock.z);
 		if(intersectingSide == 5) newBlock = spawnBlock(targetBlock.x, targetBlock.y - 1, targetBlock.z);
 		
-		if(!isSoloGame)
-		{
+		if(!isSoloGame) {
 			socket.emit("block_update", {type: "add", block: newBlock});
 		}
 	}	
 }
 
-function removeBlock()
-{
+function removeBlock() {
 	deleteBlock(targetBlock);
-	if(!isSoloGame)
-	{
+	if(!isSoloGame) {
 		socket.emit("block_update", {type: "remove", block: targetBlock});
 	}
 	targetBlock = undefined;
 }
 
-function spawnBlock(x, y, z)
-{
+function spawnBlock(x, y, z) {
 	var unusedBlockID = -1;
-	for(var i = 0; i < blocks.length; i++)
-	{
+	for(var i = 0; i < blocks.length; i++) {
 		var block = blocks[i];
-		if(block == undefined) 
-		{
-			if(unusedBlockID == -1)
-			{
+		if(block == undefined) {
+			if(unusedBlockID == -1) {
 				unusedBlockID = i;
 			}
 			continue;
 		}
-		if(block.x == x && block.y == y && block.z == z)
-		{
+		if(block.x == x && block.y == y && block.z == z) {
 			return;
 		}
 	}
@@ -332,14 +305,10 @@ function spawnBlock(x, y, z)
 	return newBlock;
 }
 
-function deleteBlock(targetBlock)
-{
-	if(targetBlock != undefined && (targetBlock.x != 0 || targetBlock.y != 0 || targetBlock.z != 0))
-	{
-		for(var i = 0; i < blocks.length; i++)
-		{
-			if(blocks[i] != undefined && blocks[i].id == targetBlock.id)
-			{
+function deleteBlock(targetBlock) {
+	if(targetBlock != undefined && (targetBlock.x != 0 || targetBlock.y != 0 || targetBlock.z != 0)) {
+		for(var i = 0; i < blocks.length; i++) {
+			if(blocks[i] != undefined && blocks[i].id == targetBlock.id) {
 				blocks[i] = undefined;
 				break;
 			}
@@ -347,22 +316,19 @@ function deleteBlock(targetBlock)
 	}
 }
 
-function setColorIndex(index)
-{
+function setColorIndex(index) {
 	currentColorIndex = index;
 	if(currentColorIndex < 0) currentColorIndex = colors.length - 1;
 	if(currentColorIndex >= colors.length) currentColorIndex = 0;
 }
 
-function keydown(key)
-{ 
+function keydown(key) {
 	keyStates[key.keyCode] = true;
 	if(lastUp[key.keyCode] == undefined)
 		lastUp[key.keyCode] = 0;
 }
 
-function keyup(key)
-{
+function keyup(key) {
 	keyStates[key.keyCode] = false;
 	lastUp[key.keyCode] = 0;
 }
@@ -370,20 +336,16 @@ function keyup(key)
 window.addEventListener("keydown", keydown);
 window.addEventListener("keyup", keyup);
 
-function isKeyPressed(key)
-{
-	if(keyStates[key] && lastUp[key] < PRESSED_DURATION)
-	{
+function isKeyPressed(key) {
+	if(keyStates[key] && lastUp[key] < PRESSED_DURATION) {
 		lastUp[key] = PRESSED_DURATION;
 		return true;
 	}
 	return false;
 }
 
-function mousemove(e)
-{
-	if(isPointerLocked)
-	{
+function mousemove(e) {
+	if(isPointerLocked) {
 		var mx = e.movementX || e.mozMovementX || e.webkitMovementX || 0;
 		var my = e.movementY || e.mozMovementY || e.webkitMovementY || 0;
 		  
@@ -392,29 +354,22 @@ function mousemove(e)
 	}
 }
 
-function mousewheel(e)
-{
+function mousewheel(e) {
 	setColorIndex(currentColorIndex + Math.sign(e.wheelDelta));
 }
 
-function onPointerLockChange(e)
-{
+function onPointerLockChange(e) {
 	isPointerLocked = document.pointerLockElement === canvas || 
 						document.mozPointerLockElement === canvas || 
 						document.webkitPointerLockElement === canvas;
 }
 
-function click(e)
-{
-	if(!isPointerLocked)
-	{
-		if(canvas.requestPointerLock && document.exitPointerLock)
-		{
+function click(e) {
+	if(!isPointerLocked) {
+		if(canvas.requestPointerLock && document.exitPointerLock) {
 			canvas.requestPointerLock();
 		}	
-	}
-	else
-	{
+	} else {
 		if(e.button == 0) placeBlock();
 		if(e.button == 2) removeBlock();
 	}
@@ -431,10 +386,9 @@ else if ("onmozpointerlockchange" in document)
 else if ("onwebkitpointerlockchange" in document)
 	document.addEventListener("webkitpointerlockchange", onPointerLockChange, false);
 
-function mollerTrumbore(v1, v2, v3, origin, direction)
-{
-	var EPSILON = 0.000001, E1 = vec3.create(), E2 = vec3.create(),
-		P = vec3.create(), Q = vec3.create(), T = vec3.create(),
+function mollerTrumbore(v1, v2, v3, origin, direction) {
+	var EPSILON = 0.000001, E1 = [], E2 = [],
+		P = [], Q = [], T = [],
 		det, u ,v;
 	
 	vec3.sub(E1, v2, v1);
@@ -452,16 +406,14 @@ function mollerTrumbore(v1, v2, v3, origin, direction)
 	return 0;
 }
 
-var movement = vec3.create();
-function moveCam(direction, magnitude)
-{
+var movement = [];
+function moveCam(direction, magnitude) {
 	movement[0] = movement[1] = movement[2] = 0;
 	vec3.scale(movement, direction, magnitude);
 	vec3.add(camPos, camPos, movement);
 }
 
-function render()
-{	
+function render() {
 	requestAnimationFrame(render);
 
 	var delta = (Date.now() - lastUpdate) / 1000;
@@ -523,8 +475,8 @@ function render()
 	camFront[1] = Math.sin(camPitch);
 	camFront[2] = Math.sin(camYaw) * Math.cos(camPitch);
 
-	camRight = vec3.create();
-	camUp = vec3.create();
+	camRight = [];
+	camUp = [];
 
 	vec3.cross(camRight, camFront, camGlobalUp);
 	vec3.normalize(camRight, camRight);
@@ -532,14 +484,14 @@ function render()
 	vec3.cross(camUp, camRight, camFront);
 	vec3.normalize(camUp, camUp);
 
-	var target = vec3.create();
+	var target = [];
 	vec3.add(target, camPos, camFront);
 	mat4.lookAt(view, camPos, target, camUp);
 
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 	gl.viewport(0, 0, canvas.width, canvas.height);
 	
-	var tPos = vec3.create();
+	var tPos = [];
 	
 	gl.activeTexture(gl.TEXTURE0);
 	gl.bindTexture(gl.TEXTURE_2D, cubeTexture);
@@ -553,8 +505,7 @@ function render()
 	var model;
 	targetBlock = undefined;
 
-	for(var i = 0; i < blocks.length; i++)
-	{
+	for(var i = 0; i < blocks.length; i++) {
 		var block = blocks[i];
 		if(block == undefined) continue;
 		
@@ -563,15 +514,13 @@ function render()
 		var dz = camPos[2] - block.z;
 		var dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
 		
-		if(dist < 5)
-		{
+		if(dist < 5) {
 			var nearestDistance = 100000;
-			for(var j = 0; j < 6; j++)
-			{
-				var rFront = vec3.create();
+			for(var j = 0; j < 6; j++) {
+				var rFront = [];
 				vec3.scale(rFront, camFront, 1.5);
 				
-				var t1v1 = vec3.create(), t1v2 = vec3.create(), t1v3 = vec3.create();
+				var t1v1 = [], t1v2 = [], t1v3 = [];
 				vec3.set(t1v1,
 					block.x + cube[(j * 20) + (0 * 5) + 0],
 					block.y + cube[(j * 20) + (0 * 5) + 1],
@@ -585,7 +534,7 @@ function render()
 					block.y + cube[(j * 20) + (2 * 5) + 1],
 					block.z + cube[(j * 20) + (2 * 5) + 2]);
 								
-				var t2v1 = vec3.create(), t2v2 = vec3.create(), t2v3 = vec3.create();
+				var t2v1 = [], t2v2 = [], t2v3 = [];
 				vec3.set(t2v1, 	
 					block.x + cube[(j * 20) + (0 * 5) + 0],
 					block.y + cube[(j * 20) + (0 * 5) + 1],
@@ -601,8 +550,7 @@ function render()
 				
 				var i1 = mollerTrumbore(t1v1, t1v2, t1v3, camPos, rFront);
 				var i2 = mollerTrumbore(t2v1, t2v2, t2v3, camPos, rFront);
-				if(i1 == 1 || i2 == 1)
-				{
+				if(i1 == 1 || i2 == 1) {
 					var cx = (t1v1[0] + t1v2[0] + t1v3[0] + t2v3[0]) / 4;
 					var cy = (t1v1[1] + t1v2[1] + t1v3[1] + t2v3[1]) / 4;
 					var cz = (t1v1[2] + t1v2[2] + t1v3[2] + t2v3[2]) / 4;
@@ -612,8 +560,7 @@ function render()
 					var dz = camPos[2] - cz;
 					
 					var dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
-					if(dist < nearestDistance)
-					{
+					if(dist < nearestDistance) {
 						nearestDistance = dist;
 						intersectingSide = j;
 						targetBlock = block;
@@ -623,8 +570,7 @@ function render()
 		}
 	}
 	
-	for(var i = 0; i < blocks.length; i++)
-	{
+	for(var i = 0; i < blocks.length; i++) {
 		var block = blocks[i];
 		if(block == undefined) continue;
 		
@@ -641,8 +587,7 @@ function render()
 		
 		var brightness = (targetBlock != undefined && targetBlock.id == block.id)? 1.5 : 1.0;
 		index = drawCube(index, model, block.r * brightness, block.g * brightness, block.b * brightness, 1.0);	
-		if(index == batchArray.length)
-		{
+		if(index == batchArray.length) {
 			index = 0;
 			gl.bufferData(gl.ARRAY_BUFFER, batchArray, gl.STATIC_DRAW);
 			gl.drawArrays(gl.TRIANGLES, 0, batchArray.length / 9);
@@ -652,8 +597,7 @@ function render()
 	for(var i = index; i < batchArray.length; i++)
 		batchArray[i] = 0;
 	
-	if(index > 0)
-	{
+	if(index > 0) {
 		gl.bufferData(gl.ARRAY_BUFFER, batchArray, gl.STATIC_DRAW);
 		gl.drawArrays(gl.TRIANGLES, 0, index / 9);
 	}
@@ -665,8 +609,7 @@ function render()
 	var b = Math.floor(colors[currentColorIndex][2] * 255);
 	
 	fpsUpdate += delta;
-	if(fpsUpdate >= 0.5)
-	{
+	if(fpsUpdate >= 0.5) {
 		fpsUpdate = 0;
 		fps = Math.floor(1 / delta);
 	}
@@ -684,8 +627,7 @@ function render()
 	context.fillText(fps + " fps", 20, 20);
 }
 
-function resize()
-{
+function resize() {
 	canvas.width = window.innerWidth;
 	canvas.height = window.innerHeight;
 	overlay.width = canvas.width;
