@@ -97,6 +97,10 @@ var isPointerLocked = false;
 var fps;
 var fpsUpdate = 0.5;
 
+var saveInterval = 300;
+var saveTimer = 0;
+var storageKey = "anheu-voxel-populus-map";
+
 window.addEventListener("load", init);
 window.addEventListener("resize", resize);
 
@@ -633,4 +637,72 @@ function resize() {
 	overlay.width = canvas.width;
 	overlay.height = canvas.height;
 	mat4.perspective(projection, vFov = 2 * Math.atan(Math.tan(hFov / 2) * canvas.height / canvas.width), canvas.width / canvas.height, 0.1, 100.0);	
+}
+
+function clearMap() {
+	blocks = [blocks[0]];
+}
+
+function loadMap(data) {
+	blocks = [];
+	if(data == undefined) {
+		data = localStorage.getItem(storageKey);	
+	}
+	
+	var split = data.split("|");
+	for(var i = 0; i < split.length; i++) {
+		var blockType = split[i];
+		var blockData = split[i].split(" ");
+		var rgb = hexStringToRGB(blockData[0]);
+		for(var j = 1; j < blockData.length; ) {
+			blocks[blocks.length] = {
+				id: parseInt(blockData[j++]),
+				x: parseInt(blockData[j++]),
+				y: parseInt(blockData[j++]),
+				z: parseInt(blockData[j++]),
+				r: rgb[0], g: rgb[1], b: rgb[2]
+			};
+		}
+	}
+}
+
+function saveMap() {
+	var map = [];
+	var colors = [];
+	for(var i = 0; i < blocks.length; i++) {
+		var block = blocks[i];
+		if(block == undefined) continue;
+		var hex = rgbToHexString(block.r, block.g, block.b);
+		if(map[hex] == undefined) {
+			map[hex] = [];
+			colors[colors.length] = hex;
+		}
+		map[hex][map[hex].length] = block.id;
+		map[hex][map[hex].length] = block.x;
+		map[hex][map[hex].length] = block.y;
+		map[hex][map[hex].length] = block.z;
+	}
+	
+	var data = "";
+	for(var i = 0; i < colors.length; i++) {
+		var hex = colors[i];
+		data += hex + " ";
+		for(var j = 0; j < map[hex].length; j++) {
+			data += map[hex][j];
+			if(j < map[hex].length - 1) data += " ";
+			else if (i < colors.length - 1) data += "|";
+		}
+	}
+	
+	localStorage.setItem(storageKey, data);
+}
+
+function rgbToHexString(r, g, b) {
+	r *= 255; g *= 255; b *= 255;
+	return ((r << 16) | (g << 8) | b).toString(16);
+}
+
+function hexStringToRGB(hex) {
+	var i = parseInt(hex, 16);
+	return [(((i >> 16)) & 255) / 255, ((i >> 8) & 255) / 255, (i & 255) / 255];
 }
