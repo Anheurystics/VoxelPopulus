@@ -664,6 +664,7 @@ function loadMap(data) {
 			};
 		}
 	}
+	blockIDs = blocks.length
 }
 
 function saveMap() {
