@@ -157,10 +157,16 @@ function init() {
 				blocks = data;
 			}
 		}
+
+		loadMap();
 		
 		lastUpdate = Date.now();
 		requestAnimationFrame(render);		
 	}
+}
+
+window.onbeforeunload = function() {
+	saveMap();
 }
 
 function initGL() {
