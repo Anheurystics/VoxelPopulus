@@ -83,9 +83,6 @@ var colors =
 ]
 var currentColorIndex = 0;
 
-var isSoloGame = false;
-var socket;
-
 var targetBlock;
 var intersectingSide;
 
@@ -136,31 +133,7 @@ function init() {
 		alert("Can't get WebGL Context!");
 	} else {
 		initGL();
-		/*
-		var query = window.location.search;
-		if(query.substring(0, 1) == '?') {
-			query = query.substring(1);
-		}
-		var data = query.split(",");
-		for(var i = 0; i < data.length; i++) {
-			data[i] = unescape(data[i]);
-		}
 
-		isSoloGame = data[0] != "false";
-
-		if(isSoloGame) {
-			spawnBlock(0, 0, 0);
-			} else {
-			socket = io.connect(data[1] + ":" + data[2]);
-
-			socket.on("update", updateBlocks);
-
-			function updateBlocks(data) {
-				blocks = data;
-			}
-		}
-		*/
-		isSoloGame = true;
 		loadData();
 
 		lastUpdate = Date.now();
@@ -278,18 +251,11 @@ function placeBlock() {
 		if(intersectingSide == 3) newBlock = spawnBlock(targetBlock.x + 1, targetBlock.y, targetBlock.z);
 		if(intersectingSide == 4) newBlock = spawnBlock(targetBlock.x, targetBlock.y + 1, targetBlock.z);
 		if(intersectingSide == 5) newBlock = spawnBlock(targetBlock.x, targetBlock.y - 1, targetBlock.z);
-
-		if(!isSoloGame) {
-			socket.emit("block_update", {type: "add", block: newBlock});
-		}
 	}
 }
 
 function removeBlock() {
 	deleteBlock(targetBlock);
-	if(!isSoloGame) {
-		socket.emit("block_update", {type: "remove", block: targetBlock});
-	}
 	targetBlock = undefined;
 }
 
