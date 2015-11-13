@@ -162,13 +162,13 @@ function initGL() {
 
 	vertexBuffer = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
-	var posLoc = gl.getAttribLocation(program, "position");
+	var posLoc = gl.getAttribLocation(program, "a_Position");
 	gl.vertexAttribPointer(posLoc, 3, gl.FLOAT, false, 9 * Float32Array.BYTES_PER_ELEMENT, 0);
 	gl.enableVertexAttribArray(posLoc);
-	var texLoc = gl.getAttribLocation(program, "texCoord");
+	var texLoc = gl.getAttribLocation(program, "a_TexCoord");
 	gl.vertexAttribPointer(texLoc, 2, gl.FLOAT, false, 9 * Float32Array.BYTES_PER_ELEMENT, 3 * Float32Array.BYTES_PER_ELEMENT);
 	gl.enableVertexAttribArray(texLoc);
-	var colLoc = gl.getAttribLocation(program, "color");
+	var colLoc = gl.getAttribLocation(program, "a_Color");
 	gl.vertexAttribPointer(colLoc, 4, gl.FLOAT, false, 9 * Float32Array.BYTES_PER_ELEMENT, 5 * Float32Array.BYTES_PER_ELEMENT);
 	gl.enableVertexAttribArray(colLoc);
 
@@ -232,7 +232,6 @@ function allocateVertex(element, index, batchIndex, model, r, g, b, a) {
 
 var indexOrder = [0, 1, 2, 0, 2, 3];
 function drawCube(index, model, r, g, b, selected) {
-	gl.uniformMatrix4fv(gl.getUniformLocation(program, "model"), false, model);
 	for(var i = 0; i < 6; i++) {
 		for(var j = 0; j < indexOrder.length; j++)  {
 			var br = (selected && i == intersectingSide)? 1.75 : 1.0;
@@ -475,10 +474,10 @@ function render() {
 
 	gl.activeTexture(gl.TEXTURE0);
 	gl.bindTexture(gl.TEXTURE_2D, cubeTexture);
-	gl.uniform1i(gl.getUniformLocation(program, "tex"), 0);
+	gl.uniform1i(gl.getUniformLocation(program, "u_Tex"), 0);
 
-	gl.uniformMatrix4fv(gl.getUniformLocation(program, "view"), false, view);
-	gl.uniformMatrix4fv(gl.getUniformLocation(program, "proj"), false, projection);
+	gl.uniformMatrix4fv(gl.getUniformLocation(program, "u_View"), false, view);
+	gl.uniformMatrix4fv(gl.getUniformLocation(program, "u_Proj"), false, projection);
 
 	var index = 0;
 

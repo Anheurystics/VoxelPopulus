@@ -9,40 +9,36 @@
 		<canvas id="canvasOverlay"></canvas>
 	</body>
 	<script type="x-shader/x-vertex" id="vert-shader">
-	attribute vec3 position;
-	attribute vec2 texCoord;
-	attribute vec4 color;
-	
-	uniform mat4 view;
-	uniform mat4 proj;
+	attribute vec3 a_Position;
+	attribute vec2 a_TexCoord;
+	attribute vec4 a_Color;
 
-	varying vec2 TexCoord;
-	varying vec4 Color;
+	uniform mat4 u_View;
+	uniform mat4 u_Proj;
+
+	varying vec2 v_TexCoord;
+	varying vec4 v_Color;
 
 	void main() {
-		gl_Position = proj * view * vec4(position, 1.0);
-		TexCoord = texCoord;
-		Color = color;
+		gl_Position = u_Proj * u_View * vec4(a_Position, 1.0);
+		v_TexCoord = a_TexCoord;
+		v_Color = a_Color;
 	}
 	</script>
 	<script type="x-shader/x-fragment" id="frag-shader">
 	precision highp float;
 
-	varying vec2 TexCoord;
-	varying vec4 Color;
+	varying vec2 v_TexCoord;
+	varying vec4 v_Color;
 
-	uniform sampler2D tex;
+	uniform sampler2D u_Tex;
 
 	void main() {
-		gl_FragColor = texture2D(tex, TexCoord) * Color;
+		gl_FragColor = texture2D(u_Tex, v_TexCoord) * v_Color;
 	}
 	</script>
-	<link rel="stylesheet" href="dependencies/bootstrap.css" />
-	<script type="text/javascript" src="dependencies/jquery-1.11.1.min.js"></script>
-	<script type="text/javascript" src="dependencies/bootstrap.min.js"></script>
-	
+
 	<link rel="stylesheet" href="css/style.css" />
-	<script type="text/javascript" src="dependencies/socket.io-1.3.5.js"></script>
-	<script type="text/javascript" src="dependencies/gl-matrix-min.js"></script>
+	<script type="text/javascript" src="js/gl-matrix-min.js"></script>
 	<script type="text/javascript" src="js/voxelPopulus.js"></script>
 </html>
