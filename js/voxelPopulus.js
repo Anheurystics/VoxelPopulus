@@ -57,7 +57,7 @@ var camPitch;
 var LOOK_SPEED = Math.PI / 2;
 
 var blockTex = new Image();
-blockTex.src = "images/blockTex_0.png";
+blockTex.src = "img/blockTex_0.png";
 
 var cubeTexture;
 
