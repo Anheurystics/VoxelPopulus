@@ -398,55 +398,74 @@ function render() {
 	var delta = (Date.now() - lastUpdate) / 1000;
 	lastUpdate = Date.now();
 
-	for(key in keyStates)
-		if(keyStates[key])
+	for(key in keyStates) {
+		if(keyStates[key]) {
 			lastUp[key] += delta;
+		}
+	}
 
-	if(isKeyPressed(27))
-		if(isPointerLocked)
+	if(isKeyPressed(27)) {
+		if(isPointerLocked) {
 			isPointerLocked = false;
+		}
+	}
 
-	if(isKeyPressed(88))
+	if(isKeyPressed(88)) {
 		setColorIndex(currentColorIndex - 1);
+	}
 
-	if(isKeyPressed(67))
+	if(isKeyPressed(67)) {
 		setColorIndex(currentColorIndex + 1);
+	}
 
-	if(isKeyPressed(32))
-		if(!keyStates[16])
+	if(isKeyPressed(32)) {
+		if(!keyStates[16]) {
 			placeBlock();
-		else
+		}
+		else {
 			removeBlock();
+		}
+	}
 
-	if(keyStates[87])
+	if(keyStates[87]) {
 		moveCam(camFront, delta * 4);
+	}
 
-	if(keyStates[83])
+	if(keyStates[83]) {
 		moveCam(camFront, -delta * 4);
+	}
 
-	if(keyStates[65])
+	if(keyStates[65]) {
 		moveCam(camRight, -delta * 4);
+	}
 
-	if(keyStates[68])
+	if(keyStates[68]) {
 		moveCam(camRight, delta * 4);
+	}
 
-	if(keyStates[81])
+	if(keyStates[81]) {
 		moveCam(camUp, delta * 4);
+	}
 
-	if(keyStates[69])
+	if(keyStates[69]) {
 		moveCam(camUp, -delta * 4);
+	}
 
-	if(keyStates[38])
+	if(keyStates[38]) {
 		camPitch += LOOK_SPEED * delta;
+	}
 
-	if(keyStates[40])
+	if(keyStates[40]) {
 		camPitch -= LOOK_SPEED * delta;
+	}
 
-	if(keyStates[37])
+	if(keyStates[37]) {
 		camYaw -= LOOK_SPEED * delta;
+	}
 
-	if(keyStates[39])
+	if(keyStates[39]) {
 		camYaw += LOOK_SPEED * delta;
+	}
 
 	camPitch = Math.max(Math.min(camPitch, vFov * 1.5), -vFov * 1.5);
 
@@ -551,15 +570,18 @@ function render() {
 
 	for(var i = 0; i < blocks.length; i++) {
 		var block = blocks[i];
-		if(block == undefined) continue;
+		if(block == undefined) {
+			continue;
+		}
 
 		var dx = camPos[0] - block.x;
 		var dy = camPos[1] - block.y;
 		var dz = camPos[2] - block.z;
 		var dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
 
-		if(dist >= 100)
+		if(dist >= 100) {
 			continue;
+		}
 
 		model = mat4.create();
 		mat4.translate(model, model, [block.x, block.y, block.z]);
@@ -643,7 +665,6 @@ function loadData(data) {
 		}
 
 		blockIDs = blocks.length;
-
 	} else {
 		spawnBlock(0, 0, 0);
 	}
@@ -654,7 +675,10 @@ function saveMap() {
 	var colors = [];
 	for(var i = 0; i < blocks.length; i++) {
 		var block = blocks[i];
-		if(block == undefined) continue;
+		if(block == undefined)  {
+			continue;
+		}
+
 		var hex = rgbToHexString(block.r, block.g, block.b);
 		if(map[hex] == undefined) {
 			map[hex] = [];
