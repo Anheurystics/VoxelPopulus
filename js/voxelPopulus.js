@@ -57,7 +57,7 @@ var camPitch;
 var LOOK_SPEED = Math.PI / 2;
 
 var blockTex = new Image();
-blockTex.src = "img/blockTex_0.png";
+blockTex.src = "/img/blockTex_1.png";
 
 var cubeTexture;
 
@@ -183,6 +183,8 @@ function initGL() {
 
 	projection = mat4.create();
 	mat4.perspective(projection, vFov = 2 * Math.atan(Math.tan(hFov / 2) * canvas.height / canvas.width), canvas.width / canvas.height, 0.1, 100.0);
+
+	alert(blockTex.width);
 
 	cubeTexture = gl.createTexture();
 	gl.bindTexture(gl.TEXTURE_2D, cubeTexture);
