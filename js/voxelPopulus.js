@@ -184,8 +184,6 @@ function initGL() {
 	projection = mat4.create();
 	mat4.perspective(projection, vFov = 2 * Math.atan(Math.tan(hFov / 2) * canvas.height / canvas.width), canvas.width / canvas.height, 0.1, 100.0);
 
-	alert(blockTex.width);
-
 	cubeTexture = gl.createTexture();
 	gl.bindTexture(gl.TEXTURE_2D, cubeTexture);
 	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, blockTex);
