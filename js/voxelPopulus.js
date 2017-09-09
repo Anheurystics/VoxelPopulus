@@ -503,6 +503,7 @@ function render() {
 	var model;
 	targetBlock = undefined;
 
+	var nearestDistance = Number.MAX_SAFE_INTEGER;
 	for(var i = 0; i < blocks.length; i++) {
 		var block = blocks[i];
 		if(block == undefined) continue;
@@ -513,7 +514,6 @@ function render() {
 		var dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
 
 		if(dist < 5) {
-			var nearestDistance = 100000;
 			for(var j = 0; j < 6; j++) {
 				var rFront = [];
 				vec3.scale(rFront, camFront, 1.5);
