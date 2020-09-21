@@ -136,7 +136,7 @@ function init() {
 	} else {
 		initGL();
 
-		loadData();
+		spawnBlock(0, 0, 0);
 
 		lastUpdate = Date.now();
 		requestAnimationFrame(render);
@@ -635,75 +635,6 @@ function resize() {
 	overlay.width = canvas.width;
 	overlay.height = canvas.height;
 	mat4.perspective(projection, vFov = 2 * Math.atan(Math.tan(hFov / 2) * canvas.height / canvas.width), canvas.width / canvas.height, 0.1, 100.0);
-}
-
-function clearMap() {
-	blocks = [blocks[0]];
-}
-
-function loadData(data) {
-	blocks = [];
-
-	if(data == undefined) {
-		data = localStorage.getItem(storageKey);
-	}
-
-	if(data != null)  {
-
-		var split = data.split("|");
-		for(var i = 0; i < split.length; i++) {
-			var blockType = split[i];
-			var blockData = split[i].split(" ");
-			var rgb = hexStringToRGB(blockData[0]);
-			for(var j = 1; j < blockData.length; ) {
-				blocks[blocks.length] = {
-					id: parseInt(blockData[j++]),
-					x: parseInt(blockData[j++]),
-					y: parseInt(blockData[j++]),
-					z: parseInt(blockData[j++]),
-					r: rgb[0], g: rgb[1], b: rgb[2]
-				};
-			}
-		}
-
-		blockIDs = blocks.length;
-	} else {
-		spawnBlock(0, 0, 0);
-	}
-}
-
-function saveMap() {
-	var map = [];
-	var colors = [];
-	for(var i = 0; i < blocks.length; i++) {
-		var block = blocks[i];
-		if(block == undefined)  {
-			continue;
-		}
-
-		var hex = rgbToHexString(block.r, block.g, block.b);
-		if(map[hex] == undefined) {
-			map[hex] = [];
-			colors[colors.length] = hex;
-		}
-		map[hex][map[hex].length] = block.id;
-		map[hex][map[hex].length] = block.x;
-		map[hex][map[hex].length] = block.y;
-		map[hex][map[hex].length] = block.z;
-	}
-
-	var data = "";
-	for(var i = 0; i < colors.length; i++) {
-		var hex = colors[i];
-		data += hex + " ";
-		for(var j = 0; j < map[hex].length; j++) {
-			data += map[hex][j];
-			if(j < map[hex].length - 1) data += " ";
-			else if (i < colors.length - 1) data += "|";
-		}
-	}
-
-	localStorage.setItem(storageKey, data);
 }
 
 function rgbToHexString(r, g, b) {
