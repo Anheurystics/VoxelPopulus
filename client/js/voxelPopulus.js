@@ -68,8 +68,6 @@ var vFov = 0;
 
 var lastUpdate;
 var blocks = [];
-var blockIDs = 0;
-var selectedBlockID = -1;
 var colors =
 [
 	[1.0, 0.2, 0.2],	//Red
@@ -201,6 +199,23 @@ function initGL() {
 	gl.blendFunc (gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 }
 
+socket.on('init_blocks', _blocks => {
+	blocks = _blocks;
+});
+
+socket.on('spawned_block', _block => {
+	blocks.push(_block);
+});
+
+socket.on('deleted_block', _id => {
+	for(let i = 0; i < blocks.length; i++) {
+		if(blocks[i].id === _id) {
+			blocks.splice(i, 1);
+			return;
+		}
+	}
+});
+
 function makeShader(type, source) {
 	var shader = gl.createShader(type);
 	gl.shaderSource(shader, source);
@@ -245,13 +260,12 @@ function drawCube(index, model, r, g, b, selected) {
 
 function placeBlock() {
 	if(targetBlock != undefined) {
-		var newBlock;
-		if(intersectingSide == 0) newBlock = spawnBlock(targetBlock.x, targetBlock.y, targetBlock.z + 1);
-		if(intersectingSide == 1) newBlock = spawnBlock(targetBlock.x, targetBlock.y, targetBlock.z - 1);
-		if(intersectingSide == 2) newBlock = spawnBlock(targetBlock.x - 1, targetBlock.y, targetBlock.z);
-		if(intersectingSide == 3) newBlock = spawnBlock(targetBlock.x + 1, targetBlock.y, targetBlock.z);
-		if(intersectingSide == 4) newBlock = spawnBlock(targetBlock.x, targetBlock.y + 1, targetBlock.z);
-		if(intersectingSide == 5) newBlock = spawnBlock(targetBlock.x, targetBlock.y - 1, targetBlock.z);
+		if(intersectingSide == 0) spawnBlock(targetBlock.x, targetBlock.y, targetBlock.z + 1);
+		if(intersectingSide == 1) spawnBlock(targetBlock.x, targetBlock.y, targetBlock.z - 1);
+		if(intersectingSide == 2) spawnBlock(targetBlock.x - 1, targetBlock.y, targetBlock.z);
+		if(intersectingSide == 3) spawnBlock(targetBlock.x + 1, targetBlock.y, targetBlock.z);
+		if(intersectingSide == 4) spawnBlock(targetBlock.x, targetBlock.y + 1, targetBlock.z);
+		if(intersectingSide == 5) spawnBlock(targetBlock.x, targetBlock.y - 1, targetBlock.z);
 	}
 }
 
@@ -261,39 +275,15 @@ function removeBlock() {
 }
 
 function spawnBlock(x, y, z) {
-	var unusedBlockID = -1;
-	for(var i = 0; i < blocks.length; i++) {
-		var block = blocks[i];
-		if(block == undefined) {
-			if(unusedBlockID == -1) {
-				unusedBlockID = i;
-			}
-			continue;
-		}
-		if(block.x == x && block.y == y && block.z == z) {
-			return;
-		}
-	}
-
-	var id = (unusedBlockID != -1 && unusedBlockID < blockIDs)? unusedBlockID : blockIDs++;
-	var newBlock = {
-		id: id, x: x, y: y, z: z,
+	socket.emit('spawn_block', {
+		x: x, y: y, z: z,
 		r: colors[currentColorIndex][0], g: colors[currentColorIndex][1], b: colors[currentColorIndex][2]
-	};
-
-	blocks[id] = newBlock;
-
-	return newBlock;
+	});
 }
 
 function deleteBlock(targetBlock) {
 	if(targetBlock != undefined && (targetBlock.x != 0 || targetBlock.y != 0 || targetBlock.z != 0)) {
-		for(var i = 0; i < blocks.length; i++) {
-			if(blocks[i] != undefined && blocks[i].id == targetBlock.id) {
-				blocks[i] = undefined;
-				break;
-			}
-		}
+		socket.emit('delete_block', targetBlock.id);
 	}
 }
 
