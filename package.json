@@ -1,0 +1,23 @@
+{
+  "name": "voxelpopulus",
+  "version": "1.0.0",
+  "description": "Voxel Populus is a web-based 3D building sandbox, written using WebGL. For now, it allows you to fly arund and to place and remove blocks. (Initial block can't be removed due to obvious reasons)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Anheurystics/VoxelPopulus.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Anheurystics/VoxelPopulus/issues"
+  },
+  "homepage": "https://github.com/Anheurystics/VoxelPopulus#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  },
+  "type": "module"
+}
