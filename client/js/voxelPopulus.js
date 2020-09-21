@@ -7,6 +7,8 @@ var program;
 
 var cubeSize = 1.0;
 
+var socket = io();
+
 var cube = [
 	//Front
 	-cubeSize / 2,  cubeSize / 2,  cubeSize / 2, 1.0, 0.0,
