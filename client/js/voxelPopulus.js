@@ -335,7 +335,7 @@ function onPointerLockChange(e) {
 						document.webkitPointerLockElement === canvas;
 }
 
-function click(e) {
+function mousedown(e) {
 	if(!isPointerLocked) {
 		if(canvas.requestPointerLock && document.exitPointerLock) {
 			canvas.requestPointerLock();
@@ -348,7 +348,7 @@ function click(e) {
 
 document.addEventListener("mousemove", mousemove);
 document.addEventListener("mousewheel", mousewheel);
-document.addEventListener("click", click);
+document.addEventListener("mousedown", mousedown);
 
 if ("onpointerlockchange" in document)
 	document.addEventListener("pointerlockchange", onPointerLockChange, false);
