@@ -378,6 +378,8 @@ function moveCam(direction, magnitude) {
 	vec3.add(camPos, camPos, movement);
 }
 
+let CAST_DISTANCE = 5;
+let DRAW_DISTANCE = 100;
 function render() {
 	requestAnimationFrame(render);
 
@@ -496,9 +498,9 @@ function render() {
 		var dx = camPos[0] - block.x;
 		var dy = camPos[1] - block.y;
 		var dz = camPos[2] - block.z;
-		var dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+		var dist = dx * dx + dy * dy + dz * dz;
 
-		if(dist < 5) {
+		if(dist < CAST_DISTANCE * CAST_DISTANCE) {
 			for(var j = 0; j < 6; j++) {
 				var rFront = [];
 				vec3.scale(rFront, camFront, 1.5);
@@ -542,7 +544,7 @@ function render() {
 					var dy = camPos[1] - cy;
 					var dz = camPos[2] - cz;
 
-					var dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+					var dist = dx * dx + dy * dy + dz * dz;
 					if(dist < nearestDistance) {
 						nearestDistance = dist;
 						intersectingSide = j;
@@ -562,9 +564,9 @@ function render() {
 		var dx = camPos[0] - block.x;
 		var dy = camPos[1] - block.y;
 		var dz = camPos[2] - block.z;
-		var dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+		var dist = dx * dx + dy * dy + dz * dz;
 
-		if(dist >= 100) {
+		if(dist >= DRAW_DISTANCE * DRAW_DISTANCE) {
 			continue;
 		}
 
