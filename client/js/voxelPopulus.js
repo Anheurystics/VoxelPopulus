@@ -558,12 +558,13 @@ function render() {
 			continue;
 		}
 
-		var dx = camPos[0] - block.x;
-		var dy = camPos[1] - block.y;
-		var dz = camPos[2] - block.z;
-		var dist = dx * dx + dy * dy + dz * dz;
+		var dx = block.x - camPos[0];
+		var dy = block.y - camPos[1];
+		var dz = block.z - camPos[2];
+		var dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+		var dist_norm = [dx / dist, dy / dist, dz / dist];
 
-		if(dist >= DRAW_DISTANCE * DRAW_DISTANCE) {
+		if(dist >= DRAW_DISTANCE || vec3.dot(dist_norm, camFront) < 0.6) {
 			continue;
 		}
 
