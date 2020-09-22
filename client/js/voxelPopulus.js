@@ -288,14 +288,14 @@ function setColorIndex(index) {
 }
 
 function keydown(key) {
-	keyStates[key.keyCode] = true;
-	if(lastUp[key.keyCode] == undefined)
-		lastUp[key.keyCode] = 0;
+	keyStates[key.code] = true;
+	if(lastUp[key.code] == undefined)
+		lastUp[key.code] = 0;
 }
 
 function keyup(key) {
-	keyStates[key.keyCode] = false;
-	lastUp[key.keyCode] = 0;
+	keyStates[key.code] = false;
+	lastUp[key.code] = 0;
 }
 
 window.addEventListener("keydown", keydown);
@@ -390,66 +390,65 @@ function render() {
 		}
 	}
 
-	if(isKeyPressed(27)) {
+	if(isKeyPressed('Escape')) {
 		if(isPointerLocked) {
 			isPointerLocked = false;
 		}
 	}
 
-	if(isKeyPressed(88)) {
+	if(isKeyPressed('KeyX')) {
 		setColorIndex(currentColorIndex - 1);
 	}
 
-	if(isKeyPressed(67)) {
+	if(isKeyPressed('KeyC')) {
 		setColorIndex(currentColorIndex + 1);
 	}
 
-	if(isKeyPressed(32)) {
-		if(!keyStates[16]) {
-			placeBlock();
-		}
-		else {
-			removeBlock();
-		}
+	if(isKeyPressed('Space')) {
+		placeBlock();
 	}
 
-	if(keyStates[87]) {
+	if(isKeyPressed('Backspace')) {
+		removeBlock();
+	}
+
+	if(keyStates['KeyW']) {
 		moveCam(camFront, delta * 4);
 	}
 
-	if(keyStates[83]) {
+	if(keyStates['KeyS']) {
 		moveCam(camFront, -delta * 4);
 	}
 
-	if(keyStates[65]) {
+	if(keyStates['KeyA']) {
 		moveCam(camRight, -delta * 4);
 	}
 
-	if(keyStates[68]) {
+	if(keyStates['KeyD']) {
 		moveCam(camRight, delta * 4);
 	}
 
-	if(keyStates[81]) {
+	if(keyStates['KeyQ']) {
 		moveCam(camUp, delta * 4);
 	}
 
-	if(keyStates[69]) {
+	if(keyStates['KeyE']) {
 		moveCam(camUp, -delta * 4);
 	}
 
-	if(keyStates[38]) {
+	if(keyStates['ArrowUp']) {
 		camPitch += LOOK_SPEED * delta;
 	}
 
-	if(keyStates[40]) {
+	if(keyStates['ArrowDown']) {
 		camPitch -= LOOK_SPEED * delta;
 	}
 
-	if(keyStates[37]) {
+	if(keyStates['ArrowLeft']) {
 		camYaw -= LOOK_SPEED * delta;
 	}
 
-	if(keyStates[39]) {
+	if(keyStates['ArrowRight']) {
 		camYaw += LOOK_SPEED * delta;
 	}
 
