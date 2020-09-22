@@ -7,6 +7,19 @@
 	<body>
 		<canvas id="canvas"></canvas>
 		<canvas id="canvasOverlay"></canvas>
+		<div id="htmlOverlay">
+			<div id="help">
+				<div style="display: flex; align-self: center; flex-direction: column; width: 100%">
+					<div class="header">Controls</div>
+					<div class="text">W/A/S/D - Standard movement</div>
+					<div class="text">Q/E - Move up/move down</div>
+					<div class="text">Left Click/Spacebar - Place block</div>
+					<div class="text">Right Click/Backspace - Remove block</div>
+					<div class="text">MouseWheel Down/C - Next Color</div>
+					<div class="text">MouseWheel Up/X - Previous Color</div>
+				</div>
+			</div>
+		</div>
 	</body>
 	<script type="x-shader/x-vertex" id="vert-shader">
 	attribute vec3 a_Position;

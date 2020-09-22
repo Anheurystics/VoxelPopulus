@@ -1,6 +1,7 @@
 var canvas;
 var gl;
 var overlay;
+var help;
 var context;
 
 var program;
@@ -119,6 +120,8 @@ function init() {
 	}
 
 	overlay = document.getElementById("canvasOverlay");
+	help = document.getElementById("help");
+	help.style.visibility = "hidden";
 	context = overlay.getContext("2d");
 
 	canvas.width = window.innerWidth;
@@ -412,6 +415,10 @@ function render() {
 		removeBlock();
 	}
 
+	if(isKeyPressed('KeyH')) {
+		help.style.visibility = (help.style.visibility === 'visible')? 'hidden' : 'visible';
+	}
+
 	if(keyStates['KeyW']) {
 		moveCam(camFront, delta * 4);
 	}
@@ -604,9 +611,10 @@ function render() {
 	context.beginPath();
 	context.arc(overlay.width/2,overlay.height/2, 4, 0, Math.PI * 2, true);
 	context.stroke();
-	context.font = "12px Arial";
+	context.font = "16px Arial";
 	context.fillStyle = "#FFFFFF";
-	context.fillText(fps + " fps", 20, 20);
+	context.fillText("Press H for help", 20, 24);
+	context.fillText(`${fps} fps`, 20, 48);
 }
 
 function resize() {
