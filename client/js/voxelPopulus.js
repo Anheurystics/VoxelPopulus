@@ -139,10 +139,6 @@ function init() {
 	}
 }
 
-window.onbeforeunload = function() {
-	saveMap();
-}
-
 function initGL() {
 	var vertShader = makeShader(gl.VERTEX_SHADER, document.getElementById("vert-shader").innerHTML);
 	var fragShader = makeShader(gl.FRAGMENT_SHADER, document.getElementById("frag-shader").innerHTML);
