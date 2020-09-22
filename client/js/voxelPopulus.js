@@ -191,6 +191,9 @@ function initGL() {
 
 	gl.enable(gl.BLEND);
 	gl.blendFunc (gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+	gl.enable(gl.CULL_FACE);
+	gl.cullFace(gl.FRONT);
 }
 
 socket.on('init_blocks', _blocks => {
@@ -567,7 +570,7 @@ function render() {
 		index = drawCube(index, block.x, block.y, block.z, block.r, block.g, block.b, targetBlock != undefined && targetBlock.id == block.id);
 		if(index == batchArray.length) {
 			index = 0;
-			gl.bufferData(gl.ARRAY_BUFFER, batchArray, gl.STATIC_DRAW);
+			gl.bufferData(gl.ARRAY_BUFFER, batchArray, gl.DYNAMIC_DRAW);
 			gl.drawArrays(gl.TRIANGLES, 0, batchArray.length / 9);
 		}
 	}
@@ -576,7 +579,7 @@ function render() {
 		batchArray[i] = 0;
 
 	if(index > 0) {
-		gl.bufferData(gl.ARRAY_BUFFER, batchArray, gl.STATIC_DRAW);
+		gl.bufferData(gl.ARRAY_BUFFER, batchArray, gl.DYNAMIC_DRAW);
 		gl.drawArrays(gl.TRIANGLES, 0, index / 9);
 	}
 
