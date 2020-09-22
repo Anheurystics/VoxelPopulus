@@ -221,18 +221,13 @@ function makeShader(type, source) {
 }
 
 var tPos = [];
-function allocateVertex(element, index, batchIndex, model, r, g, b, a) {
-	tPos[0] = cube[(index * 20) + (element * 5) + 0];
-	tPos[1] = cube[(index * 20) + (element * 5) + 1];
-	tPos[2] = cube[(index * 20) + (element * 5) + 2];
-
-	vec3.transformMat4(tPos, tPos, model);
-
-	batchArray[batchIndex++] = tPos[0];
-	batchArray[batchIndex++] = tPos[1];
-	batchArray[batchIndex++] = tPos[2];
-	batchArray[batchIndex++] = cube[(index * 20) + (element * 5) + 3];
-	batchArray[batchIndex++] = cube[(index * 20) + (element * 5) + 4];
+function allocateVertex(element, index, batchIndex, x, y, z, r, g, b, a) {
+	const offset = (index * 20) + (element * 5);
+	batchArray[batchIndex++] = cube[offset + 0] + x;
+	batchArray[batchIndex++] = cube[offset + 1] + y;
+	batchArray[batchIndex++] = cube[offset + 2] + z;
+	batchArray[batchIndex++] = cube[offset + 3];
+	batchArray[batchIndex++] = cube[offset + 4];
 	batchArray[batchIndex++] = r;
 	batchArray[batchIndex++] = g;
 	batchArray[batchIndex++] = b;
@@ -242,11 +237,11 @@ function allocateVertex(element, index, batchIndex, model, r, g, b, a) {
 }
 
 var indexOrder = [0, 1, 2, 0, 2, 3];
-function drawCube(index, model, r, g, b, selected) {
+function drawCube(index, x, y, z, r, g, b, selected) {
 	for(var i = 0; i < 6; i++) {
 		for(var j = 0; j < indexOrder.length; j++)  {
 			var br = (selected && i == intersectingSide)? 1.75 : 1.0;
-			index = allocateVertex(indexOrder[j], i, index, model, r * br, g * br, b * br, 1.0);
+			index = allocateVertex(indexOrder[j], i, index, x, y, z, r * br, g * br, b * br, 1.0);
 		}
 	}
 	return index;
@@ -487,7 +482,6 @@ function render() {
 
 	var index = 0;
 
-	var model;
 	targetBlock = undefined;
 
 	var nearestDistance = Number.MAX_SAFE_INTEGER;
@@ -570,10 +564,7 @@ function render() {
 			continue;
 		}
 
-		model = mat4.create();
-		mat4.translate(model, model, [block.x, block.y, block.z]);
-
-		index = drawCube(index, model, block.r, block.g, block.b, targetBlock != undefined && targetBlock.id == block.id);
+		index = drawCube(index, block.x, block.y, block.z, block.r, block.g, block.b, targetBlock != undefined && targetBlock.id == block.id);
 		if(index == batchArray.length) {
 			index = 0;
 			gl.bufferData(gl.ARRAY_BUFFER, batchArray, gl.STATIC_DRAW);
