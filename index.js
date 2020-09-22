@@ -8,7 +8,7 @@ const io = socketio(httpServer);
 
 app.use(express.static('client'));
 
-let blocks = [{x: 0, y: 0, z: 0, r: 1.0, g: 0.2, b: 0.2}];
+let blocks = [{id: 0, x: 0, y: 0, z: 0, r: 1.0, g: 0.2, b: 0.2}];
 io.on('connection', socket => {
     console.log('connected');
 

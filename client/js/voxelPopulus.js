@@ -134,8 +134,6 @@ function init() {
 	} else {
 		initGL();
 
-		spawnBlock(0, 0, 0);
-
 		lastUpdate = Date.now();
 		requestAnimationFrame(render);
 	}
